@@ -7,7 +7,7 @@ use std::fmt;
 use ya_gcp::{storage::StorageClient, AuthFlow, ClientBuilder, ClientBuilderConfig};
 
 const LATEST_INDEX_KEY: &str = "gcsLatestIndexKey";
-const ANNOUNCEMENT_KEY: &str = "gcsAnnouncementKey";
+const ANNOUNCEMENT_KEY: &str = "announcement.json";
 /// Path to GCS users_secret file
 pub const GCS_USER_SECRET: &str = "GCS_USER_SECRET";
 /// Path to GCS Service account key
@@ -70,7 +70,7 @@ pub struct GcsStorageClient {
     // GCS storage client
     // # Details: <https://docs.rs/ya-gcp/latest/ya_gcp/storage/struct.StorageClient.html>
     inner: StorageClient,
-    // bucket name of this client's storage
+    // bucket name of this client's storage, optionally appended with folder
     bucket: String,
 }
 
@@ -112,7 +112,7 @@ impl GcsStorageClient {
 // required by `CheckpointSyncer`
 impl fmt::Debug for GcsStorageClient {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("S3Storage")
+        f.debug_struct("GcsStorage")
             .field("bucket", &self.bucket)
             .finish()
     }
@@ -188,7 +188,7 @@ impl CheckpointSyncer for GcsStorageClient {
 
     /// Return the announcement storage location for this syncer
     fn announcement_location(&self) -> String {
-        format!("gs://{}/{}", &self.bucket, ANNOUNCEMENT_KEY)
+        format!("gs://{}", &self.bucket)
     }
 }
 

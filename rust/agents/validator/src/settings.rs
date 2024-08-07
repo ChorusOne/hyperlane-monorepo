@@ -218,7 +218,7 @@ fn parse_checkpoint_syncer(syncer: ValueParser) -> ConfigResult<CheckpointSyncer
                 bucket,
                 folder,
                 service_account_key,
-                user_secrets
+                user_secrets,
             })
         }
         Some(_) => {

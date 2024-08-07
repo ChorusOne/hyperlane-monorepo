@@ -73,22 +73,20 @@ impl FromStr for CheckpointSyncerConf {
             "gs" => {
                 let service_account_key = env::var(GCS_SERVICE_ACCOUNT_KEY).ok();
                 let user_secrets = env::var(GCS_USER_SECRET).ok();
-                if let Some(ind) = suffix.find('/') {
-                    let (bucket, folder) = suffix.split_at(ind);
-                    Ok(Self::Gcs {
-                        bucket: bucket.into(),
-                        folder: Some(folder.into()),
-                        service_account_key,
-                        user_secrets,
-                    })
-                } else {
-                    Ok(Self::Gcs {
-                        bucket: suffix.into(),
-                        folder: None,
-                        service_account_key,
-                        user_secrets,
-                    })
-                }
+
+                let url_components = suffix.split('/').collect::<Vec<&str>>();
+                let (bucket, folder): (&str, Option<String>) = match url_components.len() {
+                    1 => Ok((url_components[0], None)),
+                    2 => Ok((url_components[0], Some(url_components[1].to_owned()))),
+                    _ => Err(eyre!("Error parsing storage location; could not split bucket and folder ({suffix})"))
+                }?;
+
+                Ok(Self::Gcs {
+                    bucket: bucket.into(),
+                    folder,
+                    service_account_key,
+                    user_secrets,
+                })
             }
             _ => Err(eyre!("Unknown storage location prefix `{prefix}`")),
         }
